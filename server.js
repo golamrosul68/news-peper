@@ -1,3 +1,4 @@
+
 const express = require('express')
 const app = express()
 const dotenv = require('dotenv')
@@ -5,26 +6,47 @@ const body_parser = require('body-parser')
 const cors = require('cors')
 const db_connect = require('./utils/db')
 
+// Load environment variables
 dotenv.config()
 
-
+// Middleware
 app.use(body_parser.json())
 
 if (process.env.mode === 'production') {
     app.use(cors())
 } else {
     app.use(cors({
-        origin: ["http://localhost:5173", "http://localhost:3000"]
+        origin: [
+            "http://localhost:5173",
+            "http://localhost:3000"
+        ]
     }))
 }
 
-
+// Routes
 app.use('/', require('./routes/authRoutes'))
 app.use('/', require('./routes/newsRoute'))
-app.get('/', (req, res) => res.send('Hello World!'))
 
-const port = process.env.port
+// Home route
+app.get('/', (req, res) => {
+    res.send('News Portal Backend is Running!')
+})
 
-db_connect()
+// Server port
+const port = process.env.PORT || 5000
 
-app.listen(port, () => console.log(`server is running on port ${port}!`))
+// Database connection and server start
+const startServer = async () => {
+    try {
+        await db_connect()
+
+        app.listen(port, () => {
+            console.log(`Server is running on port ${port}!`)
+        })
+    } catch (error) {
+        console.error('Server startup failed:', error.message)
+        process.exit(1)
+    }
+}
+
+startServer()

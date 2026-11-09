@@ -1,16 +1,26 @@
+
 const mongoose = require('mongoose')
+
 const db_connect = async () => {
     try {
+        let database_url
+
         if (process.env.mode === 'production') {
-            await mongoose.connect(process.env.db_production_url)
-            console.log('poduction database connect')
+            database_url = process.env.db_production_url
         } else {
-            console.log('ok')
-            await mongoose.connect(process.env.db_local_url)
-            console.log('local database connect')
+            database_url = process.env.db_local_url
         }
+
+        if (!database_url) {
+            throw new Error('MongoDB URL is missing in .env file')
+        }
+
+        await mongoose.connect(database_url)
+
+        console.log('MongoDB Database Connected Successfully!')
     } catch (error) {
-        console.log(error)
+        console.error('MongoDB Connection Failed:', error.message)
+        throw error
     }
 }
 
